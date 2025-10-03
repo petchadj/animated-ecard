@@ -174,7 +174,7 @@ function launchConfetti() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const confettiCount = 150;
+  const confettiCount = 250;
   const confetti = [];
   let allowMovement = true;
 
@@ -222,7 +222,7 @@ function launchConfetti() {
   // After 5 seconds, stop horizontal motion but let confetti fall
   setTimeout(() => {
     allowMovement = false;
-  }, 15000);
+  }, 5000);
 }
 </script>
 
