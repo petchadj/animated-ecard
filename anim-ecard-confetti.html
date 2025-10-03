@@ -176,7 +176,6 @@ function launchConfetti() {
 
   const confettiCount = 150;
   const confetti = [];
-  let allowMovement = true;
 
   for (let i = 0; i < confettiCount; i++) {
     confetti.push({
@@ -185,8 +184,7 @@ function launchConfetti() {
       r: Math.random() * 6 + 4,
       d: Math.random() * confettiCount,
       color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-      tilt: Math.random() * 10 - 10,
-      velocityY: Math.random() * 2 + 2
+      tilt: Math.random() * 10 - 10
     });
   }
 
@@ -195,37 +193,34 @@ function launchConfetti() {
     confetti.forEach(c => {
       ctx.beginPath();
       ctx.fillStyle = c.color;
-      ctx.ellipse(c.x, c.y, c.r, c.r / 2, c.tilt, 0, 2 * Math.PI);
+      ctx.ellipse(c.x, c.y, c.r, c.r/2, c.tilt, 0, 2 * Math.PI);
       ctx.fill();
     });
     update();
-
-    // Stop animation when all confetti is off-screen
-    if (confetti.every(c => c.y > canvas.height)) return;
-
-    requestAnimationFrame(draw);
   }
 
   function update() {
     confetti.forEach(c => {
-      if (allowMovement) {
-        c.y += c.velocityY;
-        c.x += Math.sin(c.d);
-      } else {
-        c.y += c.velocityY; // continue falling only
+      c.y += Math.cos(c.d) + 1 + c.r/2;
+      c.x += Math.sin(c.d);
+      if (c.y > canvas.height) {
+        c.y = -10;
+        c.x = Math.random() * canvas.width;
       }
     });
   }
 
-  draw();
+  function animate() {
+    draw();
+    requestAnimationFrame(animate);
+  }
+  animate();
 
-  // After 5 seconds, stop horizontal motion but let confetti fall
+  // Stop after 5 seconds
   setTimeout(() => {
-    allowMovement = false;
-  }, 5000);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 5);
 }
-
-
 /*
 function launchConfetti() {
   const canvas = document.getElementById('confettiCanvas');
