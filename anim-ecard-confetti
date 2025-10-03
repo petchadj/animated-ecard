@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portrait E‑Card with Fade + Confetti</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Chewy', cursive;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden; /* keep confetti contained */
+
+  /* Off‑white base color with binding-light texture overlay */
+  background-color: #fdfdf9;
+  background-image: url("https://www.transparenttextures.com/patterns/binding-light.png");
+}
+
+.card-scene {
+  perspective: 1600px;
+}
+
+.card {
+  width: 350px;
+  height: 500px; /* portrait orientation */
+  position: relative;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.card.open .cover {
+  transform: rotateY(-160deg);
+}
+
+.cover, .inside {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #333;
+  border-radius: 10px;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+}
+
+/* Front cover */
+.cover {
+  background: #fff url('https://www.transparenttextures.com/patterns/flowers.png') no-repeat right center;
+  background-size: contain;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 1s ease;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Inside page */
+.inside {
+  background: #f6f0fa; /* light lavender */
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-text {
+  font-family: 'Chewy', cursive;
+  text-align: center;
+  padding: 20px;
+  word-wrap: break-word;
+  font-size: 1.8em;
+  transition: opacity 0.6s ease;
+}
+
+/* Hide front text when open */
+.card.open .cover .card-text {
+  opacity: 0;
+}
+
+/* Fade in inside text with delay */
+.inside .card-text {
+  opacity: 0;
+}
+.card.open .inside .card-text {
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+/* Responsive scaling */
+@media (max-width: 600px) {
+  .card {
+    width: 90vw;
+    height: calc(90vw * 1.4); /* keep portrait ratio */
+  }
+  .card-text {
+    font-size: 1.4em;
+  }
+}
+
+/* Confetti canvas overlay */
+#confettiCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="card-scene">
+  <div class="card" id="ecard">
+    <div class="cover">
+      <div class="card-text" id="frontText">Happy Birthday!</div>
+    </div>
+    <div class="inside">
+      <div class="card-text" id="insideText">Wishing you joy and laughter 🎉</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const card = document.getElementById('ecard');
+const frontText = document.getElementById('frontText');
+const insideText = document.getElementById('insideText');
+
+// Toggle open/close on click
+card.addEventListener('click', () => {
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    launchConfetti();
+  }
+});
+
+// Parse URL parameters
+const params = new URLSearchParams(window.location.search);
+const cover = params.get('cover');
+const message = params.get('message');
+
+if (cover) {
+  frontText.textContent = decodeURIComponent(cover);
+  resizeText(frontText);
+}
+if (message) {
+  insideText.textContent = decodeURIComponent(message);
+  resizeText(insideText);
+}
+
+// Auto-shrink text if it overflows
+function resizeText(el) {
+  let fontSize = 50;
+  el.style.fontSize = fontSize + "px";
+  while (el.scrollHeight > el.offsetHeight && fontSize > 12) {
+    fontSize--;
+    el.style.fontSize = fontSize + "px";
+  }
+}
+
+// Confetti animation
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confettiCount = 150;
+  const confetti = [];
+
+  for (let i = 0; i < confettiCount; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * confettiCount,
+      color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+      tilt: Math.random() * 10 - 10
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confetti.forEach(c => {
+      ctx.beginPath();
+      ctx.fillStyle = c.color;
+      ctx.ellipse(c.x, c.y, c.r, c.r/2, c.tilt, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    update();
+  }
+
+  function update() {
+    confetti.forEach(c => {
+      c.y += Math.cos(c.d) + 1 + c.r/2;
+      c.x += Math.sin(c.d);
+      if (c.y > canvas.height) {
+        c.y = -10;
+        c.x = Math.random() * canvas.width;
+      }
+    });
+  }
+
+  function animate() {
+    draw();
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Stop after 5 seconds
+  setTimeout(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 5000);
+}
+</script>
+
+</body>
+</html>
