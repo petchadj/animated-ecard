@@ -176,7 +176,7 @@ function launchConfetti() {
 
   const confettiCount = 150;
   const confetti = [];
-  let isActive = true;
+  let allowMovement = true;
 
   for (let i = 0; i < confettiCount; i++) {
     confetti.push({
@@ -201,31 +201,30 @@ function launchConfetti() {
     update();
 
     // Stop animation when all confetti is off-screen
-    if (confetti.every(c => c.y > canvas.height)) {
-      return;
-    }
+    if (confetti.every(c => c.y > canvas.height)) return;
 
     requestAnimationFrame(draw);
   }
 
   function update() {
     confetti.forEach(c => {
-      if (isActive) {
+      if (allowMovement) {
         c.y += c.velocityY;
         c.x += Math.sin(c.d);
       } else {
-        c.y += c.velocityY; // continue falling
+        c.y += c.velocityY; // continue falling only
       }
     });
   }
 
   draw();
 
-  // After 5 seconds, stop movement input but let confetti fall
+  // After 5 seconds, stop horizontal motion but let confetti fall
   setTimeout(() => {
-    isActive = false;
+    allowMovement = false;
   }, 5000);
 }
+
 
 /*
 function launchConfetti() {
