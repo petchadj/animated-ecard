@@ -149,11 +149,11 @@ const cover = params.get('cover');
 const message = params.get('message');
 
 if (cover) {
-  frontText.textContent = decodeURIComponent(cover);
+  frontText.textContent = cover;
   resizeText(frontText);
 }
 if (message) {
-  insideText.textContent = decodeURIComponent(message);
+  insideText.textContent = message;
   resizeText(insideText);
 }
 
